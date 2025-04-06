@@ -16,7 +16,7 @@ public static class GridsUtility_GetThingList
 
         foreach (var thing in __result)
         {
-            if (MoveInteractionCell.SetOverride(thing))
+            if (MoveInteractionCell.SetOverride(thing, Rot4.North))
             {
                 break;
             }

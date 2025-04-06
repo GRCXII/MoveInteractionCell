@@ -8,6 +8,6 @@ public static class Thing_DrawExtraSelectionOverlays
 {
     public static void Prefix(Thing __instance)
     {
-        MoveInteractionCell.SetOverride(__instance);
+        MoveInteractionCell.SetOverride(__instance, Rot4.North);
     }
 }
