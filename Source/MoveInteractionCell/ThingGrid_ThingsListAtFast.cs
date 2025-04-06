@@ -16,7 +16,7 @@ public static class ThingGrid_ThingsListAtFast
 
         foreach (var thing in __result)
         {
-            if (MoveInteractionCell.SetOverride(thing))
+            if (MoveInteractionCell.SetOverride(thing, Rot4.North))
             {
                 break;
             }
