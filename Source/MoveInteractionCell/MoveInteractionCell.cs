@@ -14,8 +14,8 @@ public static class MoveInteractionCell
     public static readonly List<ThingDef> BuildingsWithInteractionCell;
     public static readonly Dictionary<Thing, OverrideInfo> Overrides = [];
     public static bool InterceptThingList;
-    public static bool InterceptThingListFast;
-    public static readonly Thing BlueprintDummy;
+    public static bool InterceptThingListFast; // 添加 InterceptThingListFast
+    public static readonly Thing BlueprintDummy = new Thing(); // 添加 BlueprintDummy 初始化
 
     static MoveInteractionCell()
     {
@@ -27,7 +27,7 @@ public static class MoveInteractionCell
         new Harmony("Mlie.MoveInteractionCell").PatchAll(Assembly.GetExecutingAssembly());
     }
 
-    public static bool SetOverride(Thing building, bool useDummyThing = false)
+    public static bool SetOverride(Thing building, Rot4 placingRot, bool useDummyThing = false)
     {
         var firstThing = building.GetInnerIfMinified();
 
@@ -42,6 +42,17 @@ public static class MoveInteractionCell
             return false;
         }
 
+        // 如果是蓝图或框架，尝试从 BlueprintDummy 中获取交互点
+        if (useDummyThing && Overrides.TryGetValue(BlueprintDummy, out var dummyOverride))
+        {
+            Overrides[BlueprintDummy] = new OverrideInfo(building, dummyOverride.ReplacementOffset)
+            {
+                ThingCenter = UI.MouseCell(),
+                Rotation = placingRot
+            };
+            return true;
+        }
+
         if (!cellTracker.CustomInteractionCells.TryGetValue(firstThing, out var cell))
         {
             return false;
@@ -49,7 +60,11 @@ public static class MoveInteractionCell
 
         if (useDummyThing)
         {
-            Overrides[BlueprintDummy] = new OverrideInfo(building, cell);
+            Overrides[BlueprintDummy] = new OverrideInfo(building, cell)
+            {
+                ThingCenter = UI.MouseCell(),
+                Rotation = placingRot
+            };
         }
         else
         {
@@ -213,6 +228,15 @@ public static class MoveInteractionCell
         if (cellTracker.CustomInteractionCells.ContainsKey(building))
         {
             cellTracker.CustomInteractionCells.Remove(building);
+        }
+
+        // 确保清理与蓝图相关的临时交互点
+        if (building is Blueprint || building is Frame)
+        {
+            if (Overrides.ContainsKey(BlueprintDummy))
+            {
+                Overrides.Remove(BlueprintDummy);
+            }
         }
     }
 
