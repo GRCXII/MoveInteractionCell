@@ -16,7 +16,17 @@ public static class Designator_Install_SelectedUpdate
             return;
         }
 
-        if (!MoveInteractionCell.SetOverride(selectedItem, true))
+        // 确保新蓝图的交互点不受之前建筑的影响
+        var cellTracker = Current.Game.GetComponent<GameComponent_InteractionCellTracker>();
+        if (cellTracker != null && cellTracker.CustomInteractionCells.TryGetValue(selectedItem, out var customOffset))
+        {
+            MoveInteractionCell.Overrides[MoveInteractionCell.BlueprintDummy] = new OverrideInfo(selectedItem, customOffset)
+            {
+                ThingCenter = UI.MouseCell(),
+                Rotation = ___placingRot
+            };
+        }
+        else if (!MoveInteractionCell.SetOverride(selectedItem, ___placingRot, true))
         {
             return;
         }
